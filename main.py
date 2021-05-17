@@ -106,7 +106,23 @@ reg_name = {
     "01100": "a2",
     "01101": "a3",
     "01110": "a4",
-    "01111": "a5"
+    "01111": "a5",
+    "10000": "a6",
+    "10001": "a7",
+    "10010": "s2",
+    "10011": "s3",
+    "10100": "s4",
+    "10101": "s5",
+    "10110": "s6",
+    "10111": "s7",
+    "11000": "s8",
+    "11001": "s9",
+    "11010": "s10",
+    "11011": "s11",
+    "11100": "t3",
+    "11101": "t4",
+    "11110": "t5",
+    "11111": "t6"
 }
 
 ################# RISC Translater #####################
@@ -162,6 +178,35 @@ def get_args(bytecode, type):
         return get_args_I(bytecode)
     if type == 'I_L':
         return get_args_IL(bytecode)
+    if type == 'S':
+        return get_args_S(bytecode)
+    if type == 'SB':
+        return get_args_SB(bytecode)
+
+def get_args_SB(bc):
+    '''
+    Get the arguments of an SB type instruction.
+    We return the following format: rs1, rs2, imm
+    '''
+    def get_imm(bc):
+        '''
+        Get the value of the immediate as per the SB type format.
+        '''
+        return str(hex(int(bc[0] + bc[-7] + bc[1:7] + bc[-12:-8], 2)))
+    return f"{get_rs1(bc)}, {get_rs2(bc)}, {get_imm(bc)}"
+
+def get_args_S(bc):
+    '''
+    Get the arguments of an S-type instruction.
+    We return the following format: rs2, imm(rs1)
+    '''
+    def get_imm(bc):
+        '''
+        Get the value of the immediate as per the S type format.
+        '''
+        return str(int(bc[0:7] + bc[-12:-7], 2))
+    
+    return f"{get_rs2(bc)}, {get_imm(bc)}({get_rs1(bc)})"
 
 def get_args_IL(bc):
     '''
@@ -187,14 +232,14 @@ def get_args_I(bc):
         '''
         return str(int(bc[:12],2))
     
-    return ", ".join([get_rd(bc), get_rs1(bc), get_imm(bc)])
+    return f"{get_rd(bc)}, {get_rs1(bc)}, {get_imm(bc)}"
 
 def get_args_R(bc):
     '''
     Get the arguments of an R type instruction.
     We return the following format: rd, rs1, rs2
     '''  
-    return ", ".join([get_rd(bc), get_rs1(bc), get_rs2(bc)])
+    return f"{get_rd(bc)}, {get_rs1(bc)}, {get_rs2(bc)}"
 
 def get_rd(bc):
     '''
@@ -253,6 +298,6 @@ def pad_zeros(input):
 ############## Runner ###############
 
 if __name__ == "__main__":
-    bin = pad_zeros(hex_to_bin("00442283"))
+    bin = pad_zeros(hex_to_bin("FFEE08E3"))
     result = analyse(bin)
     print(result)

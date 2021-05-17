@@ -90,7 +90,7 @@ instruction_dictionary = {
         "1100111": "jalr",     # I-Type Operations, jalr
     }
 
-register_name = {
+reg_name = {
     "00000": "zerp",
     "00001": "ra",
     "00010": "sp",
@@ -99,7 +99,7 @@ register_name = {
     "00101": "t0",
     "00110": "t1",
     "00111": "t2",
-    "01000": "s0/fp",
+    "01000": "s0",
     "01001": "s1",
     "01010": "a0",
     "01011": "a1",
@@ -152,6 +152,36 @@ def get_inst(opcode, func3, func7):
     else:
         return subtype
 
+def get_args(bytecode, type):
+    '''
+    Dispatches to different argument retrievers based on the type of the instruction format.
+    '''
+    if type == "R":
+        return get_args_R(bytecode)
+    
+
+def get_args_R(bc):
+    '''
+    Get the arguments of an R type instruction
+    We return the following format: rd rs1 rs2
+    '''
+    def get_rd(bc):
+        c = bc[-12:-7]
+        assert c in reg_name
+        return reg_name[c]
+    
+    def get_rs1(bc):
+        c = bc[-20:-15]
+        assert c in reg_name
+        return reg_name[c]
+    
+    def get_rs2(bc):
+        c = bc[-25:-20]
+        assert c in reg_name
+        return reg_name[c]
+    
+    return ", ".join([get_rd(bc), get_rs1(bc), get_rs2(bc)])
+
 def analyse(bytecode):
     '''
     Returns a text version of given bytecode instruction
@@ -162,11 +192,7 @@ def analyse(bytecode):
 
     inst_type = get_inst_type(opcode)
     inst = get_inst(opcode, func3, func7)
-    print(inst)
-
-if __name__ == "__main__":
-    bin = pad_zeros(hex_to_bin("FFEE08E3"))
-    analyse("0"+bin)
+    return inst + " " + get_args(bytecode, inst_type)
 
 ################# Utils ###################
 
@@ -183,3 +209,11 @@ def pad_zeros(input):
     while len(input) != 32:
         input = "0" + input
     return input
+
+
+############## Runner ###############
+
+if __name__ == "__main__":
+    bin = pad_zeros(hex_to_bin("40728433"))
+    result = analyse(bin)
+    print(result)

@@ -158,29 +158,53 @@ def get_args(bytecode, type):
     '''
     if type == "R":
         return get_args_R(bytecode)
+    if type == 'I':
+        return get_args_I(bytecode)
+
+def get_args_I(bc):
+    '''
+    Get the arguments of an I type instruction.
+    We return the following format: rd, rs1, imm
+    '''
+    def get_imm(bc):
+        '''
+        Get the value of the immediate as per the I type format.
+        '''
+        return str(int(bc[:12],2))
     
+    return ", ".join([get_rd(bc), get_rs1(bc), get_imm(bc)])
 
 def get_args_R(bc):
     '''
-    Get the arguments of an R type instruction
-    We return the following format: rd rs1 rs2
-    '''
-    def get_rd(bc):
-        c = bc[-12:-7]
-        assert c in reg_name
-        return reg_name[c]
-    
-    def get_rs1(bc):
-        c = bc[-20:-15]
-        assert c in reg_name
-        return reg_name[c]
-    
-    def get_rs2(bc):
-        c = bc[-25:-20]
-        assert c in reg_name
-        return reg_name[c]
-    
+    Get the arguments of an R type instruction.
+    We return the following format: rd, rs1, rs2
+    '''  
     return ", ".join([get_rd(bc), get_rs1(bc), get_rs2(bc)])
+
+def get_rd(bc):
+    '''
+    Return the rd register value in the byte code.
+    '''
+    c = bc[-12:-7]
+    assert c in reg_name
+    return reg_name[c]
+
+def get_rs1(bc):
+    '''
+    Return the rs1 register value in the byte code.
+    '''
+    c = bc[-20:-15]
+    assert c in reg_name
+    return reg_name[c]
+
+def get_rs2(bc):
+    '''
+    Return the rs2 register value in the byte code.
+    '''
+    c = bc[-25:-20]
+    assert c in reg_name
+    return reg_name[c]
+
 
 def analyse(bytecode):
     '''
@@ -214,6 +238,6 @@ def pad_zeros(input):
 ############## Runner ###############
 
 if __name__ == "__main__":
-    bin = pad_zeros(hex_to_bin("40728433"))
+    bin = pad_zeros(hex_to_bin("00329513"))
     result = analyse(bin)
     print(result)

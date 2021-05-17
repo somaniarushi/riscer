@@ -160,6 +160,21 @@ def get_args(bytecode, type):
         return get_args_R(bytecode)
     if type == 'I':
         return get_args_I(bytecode)
+    if type == 'I_L':
+        return get_args_IL(bytecode)
+
+def get_args_IL(bc):
+    '''
+    Get the arguments of an I-Load type instruction.
+    We return the following format: rd, imm(rs1)
+    '''
+    def get_imm(bc):
+        '''
+        Get the value of the immediate as per the I type format.
+        '''
+        return str(int(bc[:12],2))
+    
+    return f"{get_rd(bc)}, {get_imm(bc)}({get_rs1(bc)})"
 
 def get_args_I(bc):
     '''
@@ -238,6 +253,6 @@ def pad_zeros(input):
 ############## Runner ###############
 
 if __name__ == "__main__":
-    bin = pad_zeros(hex_to_bin("00329513"))
+    bin = pad_zeros(hex_to_bin("00442283"))
     result = analyse(bin)
     print(result)

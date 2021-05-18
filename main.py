@@ -196,7 +196,7 @@ def get_args_UJ(bc):
         '''
         Get the value of the immediate as per the UJ-type format.
         '''
-        return str(hex(int(bc[0] + bc[13:21] + bc[12] + bc[1:12], 2)))
+        return str((int(bc[0] + bc[13:21] + bc[12] + bc[1:12], 2)))
     return f"{get_rd(bc)}, {get_imm(bc)}"
 
 def get_args_U(bc):
@@ -220,7 +220,7 @@ def get_args_SB(bc):
         '''
         Get the value of the immediate as per the SB type format.
         '''
-        return str(hex(int(bc[0] + bc[-7] + bc[1:7] + bc[-12:-8], 2)))
+        return str((int(bc[0] + bc[24] + bc[1:7] + bc[20:24], 2)))
     return f"{get_rs1(bc)}, {get_rs2(bc)}, {get_imm(bc)}"
 
 def get_args_S(bc):
@@ -304,7 +304,7 @@ def analyse(bytecode):
 
     inst_type = get_inst_type(opcode)
     inst = get_inst(opcode, func3, func7)
-    return inst.strip() + " " + get_args(bytecode, inst_type)
+    return inst + " " + get_args(bytecode, inst_type)
 
 ################# Utils ###################
 

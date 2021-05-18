@@ -184,6 +184,21 @@ def get_args(bytecode, type):
         return get_args_SB(bytecode)
     if type == 'U_1' or type == 'U_2':
         return get_args_U(bytecode)
+    if type == "UJ":
+        return get_args_UJ(bytecode)
+    
+
+def get_args_UJ(bc):
+    '''
+    Get the arguments of a UJ-type instruction.
+    We return the following format: rd, imm
+    '''
+    def get_imm(bc):
+        '''
+        Get the value of the immediate as per the UJ-type format.
+        '''
+        return str(hex(int(bc[0] + bc[13:21] + bc[12] + bc[1:12], 2)))
+    return f"{get_rd(bc)}, {get_imm(bc)}"
 
 def get_args_U(bc):
     '''
@@ -312,6 +327,6 @@ def pad_zeros(input):
 ############## Runner ###############
 
 if __name__ == "__main__":
-    bin = pad_zeros(hex_to_bin("003E8037"))
+    bin = pad_zeros(hex_to_bin("014000EF"))
     result = analyse(bin)
     print(result)

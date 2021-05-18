@@ -2,6 +2,16 @@
 
 Reference: https://cs61c.org/resources/pdf?file=riscvcard_large.pdf
 
+## Usage
+The file accepts either binary or hexadecimal codes. We have to tell the script what kind of code is being provided by passing either "bin" or "hex" as an argument to the script. 
+
+To use the converter, clone this repo to your local machine and run the following command in your terminal:
+```
+python3 main.py [bin/hex] [code]
+```
+Eg: `python3 main.py hex 0x00b542b3` returns `xor t0, a0, a1`
+
+
 ## Design Document
 Input: 32-bit bytecode
 Output: <instruction name> <register name> <register name / immediate>

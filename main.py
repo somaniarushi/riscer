@@ -1,9 +1,8 @@
-import re
-import binascii
+import sys
 
 ################### Data storage ##################
 
-## Defining A Dictionar`y for Conversion ##
+## Defining A Dictionary for Conversion ##
 opcode_dictionary = {
         "0110011": "R",     # R-Type Operations
         "0000011": "I_L",   # I-Type Operations, Load Operations
@@ -305,7 +304,7 @@ def analyse(bytecode):
 
     inst_type = get_inst_type(opcode)
     inst = get_inst(opcode, func3, func7)
-    return inst + " " + get_args(bytecode, inst_type)
+    return inst.strip() + " " + get_args(bytecode, inst_type)
 
 ################# Utils ###################
 
@@ -327,6 +326,15 @@ def pad_zeros(input):
 ############## Runner ###############
 
 if __name__ == "__main__":
-    bin = pad_zeros(hex_to_bin("014000EF"))
-    result = analyse(bin)
-    print(result)
+    assert len(sys.argv) == 3, "Please provide input with its type"
+    type, code = sys.argv[1], sys.argv[2]
+    if type == "bin":
+        if code[:2] == "0b":
+            code = code[2:]
+        bin = pad_zeros(code)
+        print("Instruction:\n", analyse(bin))
+    else:
+        if code[:2] == "0x":
+            code = code[2:]
+        bin = pad_zeros(hex_to_bin(code))
+        print("Instruction:\n", analyse(bin))

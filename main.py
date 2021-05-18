@@ -91,7 +91,7 @@ instruction_dictionary = {
     }
 
 reg_name = {
-    "00000": "zerp",
+    "00000": "x0",
     "00001": "ra",
     "00010": "sp",
     "00011": "gp",
@@ -182,6 +182,20 @@ def get_args(bytecode, type):
         return get_args_S(bytecode)
     if type == 'SB':
         return get_args_SB(bytecode)
+    if type == 'U_1' or type == 'U_2':
+        return get_args_U(bytecode)
+
+def get_args_U(bc):
+    '''
+    Get the arguments of a U-type instruction.
+    We return the following format: rd, imm
+    '''
+    def get_imm(bc):
+        '''
+        Get the value of the immediate as per the U type format. 
+        '''
+        return str(int(bc[0:20], 2))
+    return f"{get_rd(bc)}, {get_imm(bc)}"
 
 def get_args_SB(bc):
     '''
@@ -298,6 +312,6 @@ def pad_zeros(input):
 ############## Runner ###############
 
 if __name__ == "__main__":
-    bin = pad_zeros(hex_to_bin("FFEE08E3"))
+    bin = pad_zeros(hex_to_bin("003E8037"))
     result = analyse(bin)
     print(result)

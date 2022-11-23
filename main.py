@@ -13,14 +13,15 @@ opcode_dictionary = {
         "0110111": "U_2",   # U-Type Operations, non-PC-ref
         "1101111": "UJ",    # UJ-Type Operations
         "1100111": "I",     # I-Type Operations, jalr
+        "1110011": "CSR",   # CSR Operations
     }
 
 instruction_dictionary = {
         # R-Types
         "0110011": {
                 "000": {
-                    "0000000": "add", 
-                    "0000001": "mul", 
+                    "0000000": "add",
+                    "0000001": "mul",
                     "0100000": "sub",
                 },
                 "001": {
@@ -43,14 +44,14 @@ instruction_dictionary = {
                 "110": {
                     "0000000": "or",
                 },
-                "111":{ 
+                "111":{
                     "0000000": "and",
                 },
             },
         # I-Types, Loading
         "0000011": {
                 "000": "lb",
-                "001": "lh", 
+                "001": "lh",
                 "010": "lw",
             },
         # I-Types, standard
@@ -87,41 +88,49 @@ instruction_dictionary = {
         "0110111": "lui",   # U-Type Operations, non-PC-ref
         "1101111": "jal",    # UJ-Type Operations
         "1100111": "jalr",     # I-Type Operations, jalr
+        "1110011": {
+                "000": "csrrw",
+                "001": "csrrs",
+                "010": "csrrc",
+                "011": "csrrwi",
+                "101": "csrrsi",
+                "110": "csrrci",
+            },   # CSR Operations
     }
 
 reg_name = {
     "00000": "x0",
-    "00001": "ra",
-    "00010": "sp",
-    "00011": "gp",
-    "00100": "tp",
-    "00101": "t0",
-    "00110": "t1",
-    "00111": "t2",
-    "01000": "s0",
-    "01001": "s1",
-    "01010": "a0",
-    "01011": "a1",
-    "01100": "a2",
-    "01101": "a3",
-    "01110": "a4",
-    "01111": "a5",
-    "10000": "a6",
-    "10001": "a7",
-    "10010": "s2",
-    "10011": "s3",
-    "10100": "s4",
-    "10101": "s5",
-    "10110": "s6",
-    "10111": "s7",
-    "11000": "s8",
-    "11001": "s9",
-    "11010": "s10",
-    "11011": "s11",
-    "11100": "t3",
-    "11101": "t4",
-    "11110": "t5",
-    "11111": "t6"
+    "00001": "x1",
+    "00010": "x2",
+    "00011": "x3",
+    "00100": "x4",
+    "00101": "x5",
+    "00110": "x6",
+    "00111": "x7",
+    "01000": "x8",
+    "01001": "x9",
+    "01010": "x10",
+    "01011": "x11",
+    "01100": "x12",
+    "01101": "x13",
+    "01110": "x14",
+    "01111": "x15",
+    "10000": "x16",
+    "10001": "x17",
+    "10010": "x18",
+    "10011": "x19",
+    "10100": "x20",
+    "10101": "x21",
+    "10110": "x22",
+    "10111": "x23",
+    "11000": "x24",
+    "11001": "x25",
+    "11010": "x26",
+    "11011": "x27",
+    "11100": "x28",
+    "11101": "x29",
+    "11110": "x30",
+    "11111": "x31"
 }
 
 ################# RISC Translater #####################
@@ -149,17 +158,18 @@ def get_inst_type(opcode):
     Accepts opcode and returns the instruction type of the bytecode using opcode dictionary.
     '''
     assert opcode in opcode_dictionary, "Opcode not recognized"
-    return opcode_dictionary[opcode] 
+    return opcode_dictionary[opcode]
 
 def get_inst(opcode, func3, func7):
     '''
-    Returns the name of the instruction 
+    Returns the name of the instruction
     '''
     assert opcode in instruction_dictionary
     subtype = instruction_dictionary[opcode]
     if isinstance(subtype, dict):
         subsubtype = instruction_dictionary[opcode][func3]
         if isinstance(subsubtype, dict):
+            print(opcode, func3, func7)
             subsubsubtype = instruction_dictionary[opcode][func3][func7]
             return subsubsubtype
         else:
@@ -185,7 +195,9 @@ def get_args(bytecode, type):
         return get_args_U(bytecode)
     if type == "UJ":
         return get_args_UJ(bytecode)
-    
+    if type == "CSR":
+        return get_args_CSR(bytecode)
+
 
 def get_args_UJ(bc):
     '''
@@ -206,7 +218,7 @@ def get_args_U(bc):
     '''
     def get_imm(bc):
         '''
-        Get the value of the immediate as per the U type format. 
+        Get the value of the immediate as per the U type format.
         '''
         return str(int(bc[0:20], 2))
     return f"{get_rd(bc)}, {get_imm(bc)}"
@@ -233,7 +245,7 @@ def get_args_S(bc):
         Get the value of the immediate as per the S type format.
         '''
         return str(int(bc[0:7] + bc[-12:-7], 2))
-    
+
     return f"{get_rs2(bc)}, {get_imm(bc)}({get_rs1(bc)})"
 
 def get_args_IL(bc):
@@ -246,8 +258,20 @@ def get_args_IL(bc):
         Get the value of the immediate as per the I type format.
         '''
         return str(int(bc[:12],2))
-    
+
     return f"{get_rd(bc)}, {get_imm(bc)}({get_rs1(bc)})"
+
+def get_args_CSR(bc):
+    '''
+    Get the arguments of a CSR type instruction.
+    We return the following format: rd, csr, imm
+    '''
+    def get_csr(bc):
+        '''
+        Get the value of the csr as per the CSR type format.
+        '''
+        return str(int(bc[12:20],2))
+    return f"{get_rd(bc)}, {get_csr(bc)}, {get_rs1(bc)}"
 
 def get_args_I(bc):
     '''
@@ -259,14 +283,14 @@ def get_args_I(bc):
         Get the value of the immediate as per the I type format.
         '''
         return str(int(bc[:12],2))
-    
+
     return f"{get_rd(bc)}, {get_rs1(bc)}, {get_imm(bc)}"
 
 def get_args_R(bc):
     '''
     Get the arguments of an R type instruction.
     We return the following format: rd, rs1, rs2
-    '''  
+    '''
     return f"{get_rd(bc)}, {get_rs1(bc)}, {get_rs2(bc)}"
 
 def get_rd(bc):

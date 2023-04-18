@@ -1,4 +1,4 @@
-# Bytecode to RISC Converter
+# 🧮 Bytecode to RISC Converter
 
 Reference: https://cs61c.org/resources/pdf?file=riscvcard_large.pdf
 
